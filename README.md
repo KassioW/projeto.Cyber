@@ -3,6 +3,8 @@
 **Projeto Aplicado: Práticas de Mercado**  
 *Pós-graduação em Segurança da Informação e Análise Forense*
 
+Acesso seguro: https://129.148.45.185.nip.io/
+
 ## 📌 Visão Geral do Projeto
 Este repositório contém o protótipo de um Dashboard de Monitoramento de Ativos de TI (Mock Data). O sistema foi desenvolvido com foco no princípio de *Secure by Design*, implementando controles de segurança desde a concepção do código até a sua implantação em infraestrutura Cloud. 
 
