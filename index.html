@@ -12,31 +12,28 @@
             align-items: center; 
             height: 100vh; 
             margin: 0;
-            overflow: hidden; /* Evita barras de rolagem */
+            overflow: hidden;
         }
         
-        /* Configuração do Mapa no Background */
         #mapa-fundo {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: -1; /* Joga o mapa para trás de todos os elementos */
+            z-index: -1;
             border: none;
-            /* pointer-events: none; Descomente esta linha se não quiser que o usuário consiga arrastar o mapa */
         }
 
-        /* Cartão de Informações */
         .card { 
-            /* Fundo branco com 90% de opacidade para um efeito translúcido elegante sobre o mapa */
             background: rgba(255, 255, 255, 0.9); 
             padding: 30px; 
             border-radius: 12px; 
             box-shadow: 0 8px 32px rgba(0,0,0,0.3); 
+            width: 90%; /* Ajuste principal para mobile */
             max-width: 400px;
-            width: 100%;
-            backdrop-filter: blur(5px); /* Efeito de desfoque no fundo */
+            box-sizing: border-box; /* Evita que o padding quebre a largura no celular */
+            backdrop-filter: blur(5px);
         }
         
         h2 { margin-top: 0; color: #333; text-align: center; }
@@ -46,7 +43,6 @@
 </head>
 <body>
 
-<!-- Iframe vazio que receberá o link do Google Maps via JavaScript -->
 <iframe id="mapa-fundo" src=""></iframe>
 
 <div class="card">
@@ -57,20 +53,23 @@
 </div>
 
 <script>
-    fetch('https://ipapi.co/json/')
-        .then(resposta => resposta.json())
+    // Passo 1: Busca estritamente o IPv4
+    fetch('https://api.ipify.org?format=json')
+        .then(respostaIpv4 => respostaIpv4.json())
+        .then(dadosIpv4 => {
+            const ipApenasV4 = dadosIpv4.ip;
+            document.getElementById('ip').textContent = ipApenasV4;
+
+            // Passo 2: Pede a localização baseada nesse IPv4
+            return fetch(`https://ipapi.co/${ipApenasV4}/json/`);
+        })
+        .then(respostaLocal => respostaLocal.json())
         .then(dados => {
-            // 1. Preenche os dados no cartão
-            document.getElementById('ip').textContent = dados.ip;
             document.getElementById('local').textContent = `${dados.city}, ${dados.region}`;
             document.getElementById('provedor').textContent = dados.org;
 
-            // 2. Extrai latitude e longitude
             const lat = dados.latitude;
             const lon = dados.longitude;
-
-            // 3. Monta a URL do Google Maps e injeta no iframe
-            // O parâmetro 'z=13' define o nível de zoom do mapa
             const urlGoogleMaps = `https://maps.google.com/maps?q=${lat},${lon}&z=13&output=embed`;
             document.getElementById('mapa-fundo').src = urlGoogleMaps;
         })
