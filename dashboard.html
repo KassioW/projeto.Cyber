@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Equipamentos</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 10px 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        button.logout { background: #d32f2f; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
+        button.logout:hover { background: #b71c1c; }
+        table { width: 100%; margin-top: 20px; border-collapse: collapse; background: #fff; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+        th { background: #03a9f4; color: white; }
+        .status-on { color: green; font-weight: bold; }
+        .status-off { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<script>
+    // )Mitigação OWASP A01) verifica se o usuario esta logado
+    if (!sessionStorage.getItem('auth_token')) {
+        window.location.href = 'index.html';
+    }
+
+    function fazerLogout() {
+        sessionStorage.removeItem('auth_token');
+        window.location.href = 'index.html';
+    }
+</script>
+
+<div class="header">
+    <h2>Painel de Status de Equipamentos</h2>
+    <button class="logout" onclick="fazerLogout()">Sair (Logout)</button>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Equipamento</th>
+            <th>Endereço IP</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody id="tabela-equipamentos">
+        <!-- Injeção de dados via script -->
+    </tbody>
+</table>
+
+<script>
+    // Mock Data
+    const equipamentos = [
+        { nome: "Servidor Zabbix Main", ip: "10.0.1.15", status: "Online" },
+        { nome: "HikCentral NVR - Core", ip: "10.0.1.22", status: "Online" },
+        { nome: "Câmera Estacionamento", ip: "192.168.10.5", status: "Offline" }
+    ];
+
+    const tbody = document.getElementById('tabela-equipamentos');
+
+    equipamentos.forEach(eq => {
+        const tr = document.createElement('tr');
+        
+        const tdNome = document.createElement('td');
+        // Mitigação OWASP A03: Prevenção de XSS usando textContent em vez de innerHTML
+        tdNome.textContent = eq.nome; 
+        
+        const tdIp = document.createElement('td');
+        tdIp.textContent = eq.ip;
+        
+        const tdStatus = document.createElement('td');
+        tdStatus.textContent = eq.status;
+        tdStatus.className = eq.status === 'Online' ? 'status-on' : 'status-off';
+
+        tr.appendChild(tdNome);
+        tr.appendChild(tdIp);
+        tr.appendChild(tdStatus);
+        
+        tbody.appendChild(tr);
+    });
+</script>
+
+</body>
+</html>
