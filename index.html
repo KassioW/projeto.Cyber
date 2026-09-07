@@ -3,50 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Monitoramento</title>
+    <title>Informações de Conexão</title>
     <style>
-        body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #ffffff; }
-        .login-box { background: #eee8e8; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); width: 300px; text-align: center; }
-        input { width: 90%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; }
-        button { width: 100%; padding: 10px; background: #03a9f4; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        button:hover { background: #0288d1; }
-        #erro { color: red; font-size: 0.9em; display: none; }
+        body { 
+            font-family: Arial, sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0;
+            overflow: hidden; /* Evita barras de rolagem */
+        }
+        
+        /* Configuração do Mapa no Background */
+        #mapa-fundo {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* Joga o mapa para trás de todos os elementos */
+            border: none;
+            /* pointer-events: none; Descomente esta linha se não quiser que o usuário consiga arrastar o mapa */
+        }
+
+        /* Cartão de Informações */
+        .card { 
+            /* Fundo branco com 90% de opacidade para um efeito translúcido elegante sobre o mapa */
+            background: rgba(255, 255, 255, 0.9); 
+            padding: 30px; 
+            border-radius: 12px; 
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3); 
+            max-width: 400px;
+            width: 100%;
+            backdrop-filter: blur(5px); /* Efeito de desfoque no fundo */
+        }
+        
+        h2 { margin-top: 0; color: #333; text-align: center; }
+        p { font-size: 1.1em; color: #444; line-height: 1.6; }
+        .dado { font-weight: bold; color: #03a9f4; }
     </style>
 </head>
 <body>
 
-<div class="login-box">
-    <h2>Acesso Restrito</h2>
-    <input type="text" id="usuario" placeholder="Usuário" required>
-    <input type="password" id="senha" placeholder="Senha" required>
-    <button onclick="realizarLogin()">Entrar</button>
-    <p id="erro">Credenciais inválidas!</p>
+<!-- Iframe vazio que receberá o link do Google Maps via JavaScript -->
+<iframe id="mapa-fundo" src=""></iframe>
+
+<div class="card">
+    <h2>Olá</h2>
+    <p>Seu ip é: <br><span id="ip" class="dado">Buscando...</span></p>
+    <p>Você atualmente está localizado em: <br><span id="local" class="dado">Buscando...</span></p>
+    <p>Seu provedor de internet é: <br><span id="provedor" class="dado">Buscando...</span></p>
 </div>
 
 <script>
-    // gerar hash (Mitigação OWASP A07)
-    async function gerarHash(texto) {
-        const buffer = new TextEncoder().encode(texto);
-        const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    }
+    fetch('https://ipapi.co/json/')
+        .then(resposta => resposta.json())
+        .then(dados => {
+            // 1. Preenche os dados no cartão
+            document.getElementById('ip').textContent = dados.ip;
+            document.getElementById('local').textContent = `${dados.city}, ${dados.region}`;
+            document.getElementById('provedor').textContent = dados.org;
 
-    async function realizarLogin() {
-        const usuario = document.getElementById('usuario').value;
-        const senha = document.getElementById('senha').value;
-        const erroBox = document.getElementById('erro');
-        
-        const senhaHash = await gerarHash(senha);
-        const hashEsperado = '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9'; // hash de admin
+            // 2. Extrai latitude e longitude
+            const lat = dados.latitude;
+            const lon = dados.longitude;
 
-        if (usuario === 'admin' && senhaHash === hashEsperado) {
-            sessionStorage.setItem('auth_token', 'token_seguro_simulado');
-            window.location.href = 'dashboard.html';
-        } else {
-            erroBox.style.display = 'block';
-        }
-    }
+            // 3. Monta a URL do Google Maps e injeta no iframe
+            // O parâmetro 'z=13' define o nível de zoom do mapa
+            const urlGoogleMaps = `https://maps.google.com/maps?q=${lat},${lon}&z=13&output=embed`;
+            document.getElementById('mapa-fundo').src = urlGoogleMaps;
+        })
+        .catch(erro => {
+            document.getElementById('ip').textContent = "Indisponível";
+            document.getElementById('local').textContent = "Indisponível";
+            document.getElementById('provedor').textContent = "Indisponível";
+            console.error("Erro ao buscar dados:", erro);
+        });
 </script>
 
 </body>
