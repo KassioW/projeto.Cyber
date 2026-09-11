@@ -50,8 +50,8 @@
     <p>Seu ip é: <br><span id="ip" class="dado">Buscando...</span></p>
     <p>Você atualmente está localizado em: <br><span id="local" class="dado">Buscando...</span></p>
     <p>Seu provedor de internet é: <br><span id="provedor" class="dado">Buscando...</span></p>
-    <!-- Novas linhas adicionadas abaixo -->
-    <p>Fuso Horário: <br><span id="fuso" class="dado">Buscando...</span></p>
+    <!-- Novas linhas: Data/Hora e SO -->
+    <p>Data e Hora: <br><span id="datahora" class="dado">Buscando...</span></p>
     <p>Sistema Operacional: <br><span id="os" class="dado">Buscando...</span></p>
 </div>
 
@@ -66,6 +66,11 @@
         if (/Win/i.test(userAgent)) return "Windows";
         if (/Linux/i.test(userAgent)) return "Linux";
         return "Desconhecido";
+    }
+
+    // Função para capturar a data e hora do dispositivo
+    function obterDataHora() {
+        return new Date().toLocaleString('pt-BR');
     }
 
     // Passo 1: Busca estritamente o IPv4
@@ -83,8 +88,8 @@
             document.getElementById('local').textContent = `${dados.city}, ${dados.region}`;
             document.getElementById('provedor').textContent = dados.org;
             
-            // Injeta o Fuso Horário da API e o SO detectado
-            document.getElementById('fuso').textContent = dados.timezone;
+            // Injeta a Data/Hora local e o SO detectado
+            document.getElementById('datahora').textContent = obterDataHora();
             document.getElementById('os').textContent = detectarOS();
 
             const lat = dados.latitude;
@@ -97,9 +102,9 @@
             document.getElementById('local').textContent = "Indisponível";
             document.getElementById('provedor').textContent = "Indisponível";
             
-            // Tratamento de erro para os novos campos
-            document.getElementById('fuso').textContent = "Indisponível";
-            document.getElementById('os').textContent = detectarOS(); // O OS não precisa de internet
+            // A Data/Hora e o OS funcionam mesmo se a API falhar ou houver bloqueio
+            document.getElementById('datahora').textContent = obterDataHora();
+            document.getElementById('os').textContent = detectarOS();
             
             console.error("Erro ao buscar dados:", erro);
         });
