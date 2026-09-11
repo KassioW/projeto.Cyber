@@ -1,4 +1,4 @@
-# 🛡️ Painel de Monitoramento Seguro (Web Dashboard)
+# 🛡️ Painel Forense de Conexão e Geolocalização (Web Dashboard)
 
 **Projeto Aplicado: Práticas de Mercado**  
 *Pós-graduação em Segurança da Informação e Análise Forense*
@@ -6,13 +6,13 @@
 Acesso seguro: https://129.148.45.185.nip.io/
 
 ## 📌 Visão Geral do Projeto
-Este repositório contém o protótipo de um Dashboard de Monitoramento de Ativos de TI (Mock Data). O sistema foi desenvolvido com foco no princípio de *Secure by Design*, implementando controles de segurança desde a concepção do código até a sua implantação em infraestrutura Cloud. 
+Este repositório contém o protótipo de um Dashboard de Rastreamento e Análise de Conexão. O sistema foi desenvolvido com foco no princípio de *Secure by Design*, implementando controles de segurança desde a concepção do código até a sua implantação em infraestrutura Cloud. 
 
 O projeto é composto por uma interface Front-end estática (HTML, CSS e Vanilla JavaScript) dividida em duas telas principais:
 1. **Login (`index.html`):** Autenticação segura de usuários.
-2. **Página Interna (`dashboard.html`):** Tabela de status de equipamentos, restrita a usuários autenticados, com funcionalidade de *Logout*.
+2. **Página Interna (`dashboard.html`):** Painel de extração de dados forenses (IP, localização georreferenciada, provedor, data/hora e fingerprinting de sistema operacional), restrita a usuários autenticados, com funcionalidade de *Logout*.
 
-As ações de desenvolvimento, estruturação e auditoria de código contaram com o suporte de inteligência artificial (Google Antigravity / IA Assistente).
+As ações de desenvolvimento, estruturação e auditoria de código contaram com o suporte de inteligência artificial.
 
 ---
 
@@ -22,15 +22,15 @@ Em conformidade com os requisitos de segurança, o código-fonte deste projeto m
 
 ### 1. Broken Access Control (Falha de Controle de Acesso) - OWASP A01
 * **Onde foi mitigado:** Arquivo `dashboard.html`, nas primeiras linhas da tag `<script>`.
-* **Como previne:** O código implementa uma verificação de sessão (`sessionStorage.getItem('auth_token')`) antes de renderizar qualquer conteúdo sensível. Se um usuário mal-intencionado tentar acessar a URL da página interna diretamente sem ter passado pelo processo de login, o script bloqueia o acesso e força um redirecionamento imediato para a página `index.html`. 
+* **Como previne:** O código implementa uma verificação de sessão (`sessionStorage.getItem('auth_token')`) antes de renderizar qualquer conteúdo sensível. Se um usuário tentar acessar a URL da página interna diretamente sem ter passado pelo processo de login, o script bloqueia o acesso e força um redirecionamento imediato para a página `index.html`. 
 
 ### 2. Identification and Authentication Failures (Falhas de Autenticação) - OWASP A07
 * **Onde foi mitigado:** Arquivo `index.html`, nas funções `gerarHash()` e `realizarLogin()`.
 * **Como previne:** Para evitar a exposição de credenciais, o sistema não armazena e não compara a senha em texto claro. O input digitado pelo usuário na tela de login é submetido à API nativa `crypto.subtle.digest`, que gera um hash criptográfico **SHA-256**. A autenticação só ocorre se o hash gerado coincidir com o hash esperado pelo sistema. Isso simula a prática de mercado de nunca transacionar senhas em texto puro.
 
 ### 3. Injection / Cross-Site Scripting (XSS) - OWASP A03
-* **Onde foi mitigado:** Arquivo `dashboard.html`, dentro do laço de repetição `equipamentos.forEach` que renderiza a tabela.
-* **Como previne:** A injeção de dados dinâmicos na interface (construção do DOM) é feita exclusivamente utilizando a propriedade `textContent` na criação das células da tabela (`tdNome.textContent = eq.nome`). O uso do `textContent` em detrimento do `innerHTML` garante que os dados processados sejam interpretados estritamente como texto puro, neutralizando qualquer tentativa de execução de scripts nocivos (XSS) ou tags HTML maliciosas injetadas através de manipulação de dados.
+* **Onde foi mitigado:** Arquivo `dashboard.html`, no processo de exibição dos dados retornados pelas APIs de rede e scripts de identificação local.
+* **Como previne:** A injeção de dados dinâmicos na interface (construção do DOM) é feita exclusivamente utilizando a propriedade `textContent` na manipulação dos elementos (ex: `document.getElementById('ip').textContent = ipApenasV4`). O uso do `textContent` em detrimento do `innerHTML` garante que os dados processados sejam interpretados estritamente como texto puro, neutralizando qualquer tentativa de execução de scripts nocivos (XSS) ou tags HTML maliciosas injetadas através de pacotes adulterados.
 
 ---
 
